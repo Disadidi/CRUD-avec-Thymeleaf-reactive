@@ -1,5 +1,7 @@
 package com.hdconsulting.springboot.webflux.app;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ public class SpringBootWebfluxApplication implements CommandLineRunner {
 
 	@Autowired
 	private ProductoDao dao;
+	
 	private static final Logger log = LoggerFactory.getLogger(SpringBootWebfluxApplication.class);
 	
 	@Autowired
@@ -31,8 +34,9 @@ public class SpringBootWebfluxApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
+		mongoTemplate.dropCollection("producto").subscribe();
 		mongoTemplate.dropCollection("productos").subscribe();
-		
+		 
 		Flux.just(new Producto("TV Panasonic Pantalla LCD", 456.89),
 				new Producto("Sony Camara HD Digital", 177.89),
 				new Producto("Apple iPod", 46.89),
@@ -43,7 +47,10 @@ public class SpringBootWebfluxApplication implements CommandLineRunner {
 				new Producto("Mica Cómoda 5 Cajones", 150.89),
 				new Producto("TV Sony Bravia OLED 4K Ultra HD", 2255.89)
 				)
-		.flatMap(producto -> dao.save(producto))
+		.flatMap(producto -> {
+			producto.setCreateAt(new Date());
+			return dao.save(producto);
+		})
 		.subscribe(producto -> log.info("Insert: " + producto.getId() + " " + producto.getNombre()));
 		
 	}
