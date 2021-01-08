@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Document(collection="productos")
 public class Producto {
@@ -12,6 +13,8 @@ public class Producto {
 	private String id;
 	private String nombre;
 	private Double precio;
+	
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date createAt;
 	
 	public Producto() {
