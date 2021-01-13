@@ -54,7 +54,7 @@ public class ProductoController {
 		Mono<Producto> productoMono = service.findById(id).doOnNext(p -> {
 			//pour afficher le nom du produit
 			log.info("Producto: " + p.getNombre());
-		});
+		}).defaultIfEmpty(new Producto());
 		
 		model.addAttribute("titulo", "Editar Producto");
 		model.addAttribute("producto", productoMono);
