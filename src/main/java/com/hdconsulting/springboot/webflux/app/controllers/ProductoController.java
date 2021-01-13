@@ -49,6 +49,33 @@ public class ProductoController {
 		return Mono.just("form");
 	}
 	
+	@GetMapping("/form-v2/{id}")
+	public Mono<String> editarV2(@PathVariable String id, Model model){
+		return service.findById(id).doOnNext(p -> {
+			//pour afficher le nom du produit
+			log.info("Producto: " + p.getNombre());
+			/*
+			 * effet perver de cette solution, ces paramétres ne se garde pas dans
+			 * la session, car ils sont executés dans un autre fils (thread)
+			*/
+			model.addAttribute("titulo", "Editar Producto");
+			model.addAttribute("producto", p);
+		}).defaultIfEmpty(new Producto())
+				.flatMap(p -> {
+					if (p.getId() == null) {
+						return Mono.error(new InterruptedException("No existe el producto"));
+					}
+					return Mono.just(p);
+				})
+		.then(Mono.just("form"))
+		.onErrorResume(ex -> Mono.just("redirect:/listar?error=no+existe+el+producto"));
+		
+		
+		
+
+		
+	}
+	
 	@GetMapping("/form/{id}")
 	public Mono<String> editar(@PathVariable String id, Model model){
 		Mono<Producto> productoMono = service.findById(id).doOnNext(p -> {
