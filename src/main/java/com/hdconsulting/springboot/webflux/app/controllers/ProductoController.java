@@ -10,6 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 import org.thymeleaf.spring5.context.webflux.ReactiveDataDriverContextVariable;
 
 import com.hdconsulting.springboot.webflux.app.models.documents.Producto;
@@ -18,6 +20,7 @@ import com.hdconsulting.springboot.webflux.app.models.services.ProductoService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@SessionAttributes("producto") //on met l'attribute producto dans la session
 @Controller
 public class ProductoController {
 	
@@ -61,7 +64,8 @@ public class ProductoController {
 	}
 	
 	@PostMapping("/form")
-	public Mono<String> guardar(Producto producto){
+	public Mono<String> guardar(Producto producto, SessionStatus status /*pour supprimer les attributes de la session*/){
+		status.setComplete();
 		 return service.save(producto).doOnNext(p -> {
 			log.info("Producto guardado: " + p.getNombre() + "Id: " + p.getId());
 		}).thenReturn("redirect:/listar");
