@@ -5,6 +5,10 @@
 <title th:text="${titulo}">Insert title here</title>
 </head>
 <body>
+
+<div th:if="${param.error != null}" th:text="${param.error}"></div>
+<div th:if="${param.success != null}" th:text="${param.success}"></div>
+
 <h1 th:text="${titulo}"></h1>
 <a th:href="@{/form}">crear +</a>
 <table>

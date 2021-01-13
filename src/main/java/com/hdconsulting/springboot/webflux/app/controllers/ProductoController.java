@@ -45,6 +45,7 @@ public class ProductoController {
 		
 		model.addAttribute("producto", new Producto());
 		model.addAttribute("titulo", "Formulario de producto");
+		model.addAttribute("boton", "Crear");
 		
 		return Mono.just("form");
 	}
@@ -58,6 +59,7 @@ public class ProductoController {
 			 * effet perver de cette solution, ces paramétres ne se garde pas dans
 			 * la session, car ils sont executés dans un autre fils (thread)
 			*/
+			model.addAttribute("boton", "Editar");
 			model.addAttribute("titulo", "Editar Producto");
 			model.addAttribute("producto", p);
 		}).defaultIfEmpty(new Producto())
@@ -83,6 +85,7 @@ public class ProductoController {
 			log.info("Producto: " + p.getNombre());
 		}).defaultIfEmpty(new Producto());
 		
+		model.addAttribute("boton", "Editar");
 		model.addAttribute("titulo", "Editar Producto");
 		model.addAttribute("producto", productoMono);
 		
