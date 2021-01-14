@@ -10,9 +10,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 
-import com.hdconsulting.springboot.webflux.app.models.dao.ProductoDao;
+import com.hdconsulting.springboot.webflux.app.models.documents.Categoria;
 import com.hdconsulting.springboot.webflux.app.models.documents.Producto;
-
+import com.hdconsulting.springboot.webflux.app.models.services.ProductoService;
 
 import reactor.core.publisher.Flux;
 
@@ -20,7 +20,7 @@ import reactor.core.publisher.Flux;
 public class SpringBootWebfluxApplication implements CommandLineRunner {
 
 	@Autowired
-	private ProductoDao dao;
+	private ProductoService service;
 	
 	private static final Logger log = LoggerFactory.getLogger(SpringBootWebfluxApplication.class);
 	
@@ -34,24 +34,37 @@ public class SpringBootWebfluxApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-		mongoTemplate.dropCollection("producto").subscribe();
 		mongoTemplate.dropCollection("productos").subscribe();
-		 
-		Flux.just(new Producto("TV Panasonic Pantalla LCD", 456.89),
-				new Producto("Sony Camara HD Digital", 177.89),
-				new Producto("Apple iPod", 46.89),
-				new Producto("Sony Notebook", 846.89),
-				new Producto("Hewlett Packard Multifuncional", 200.89),
-				new Producto("Bianchi Bicicleta", 70.89),
-				new Producto("HP Notebook Omen 17", 2500.89),
-				new Producto("Mica Cómoda 5 Cajones", 150.89),
-				new Producto("TV Sony Bravia OLED 4K Ultra HD", 2255.89)
-				)
-		.flatMap(producto -> {
-			producto.setCreateAt(new Date());
-			return dao.save(producto);
+		mongoTemplate.dropCollection("categorias").subscribe();
+		mongoTemplate.dropCollection("categoria").subscribe();
+		
+		Categoria electronica = new Categoria("Electrònico");
+		Categoria  deporte = new Categoria("Deporte");
+		Categoria computacion = new Categoria("Computacion");
+		Categoria muebles = new Categoria("Muebles");
+		
+		Flux.just(electronica, deporte, computacion, muebles)
+		.flatMap(service::saveCategoria)
+		.doOnNext(c ->{
+			log.info("Categoria creada: " + c.getNombre() + ", Id: " + c.getId());
 		})
-		.subscribe(producto -> log.info("Insert: " + producto.getId() + " " + producto.getNombre()));
+		.thenMany(
+				Flux.just(new Producto("TV Panasonic Pantalla LCD", 456.89, electronica),
+						new Producto("Sony Camara HD Digital", 177.89,electronica),
+						new Producto("Apple iPod", 46.89, electronica),
+						new Producto("Sony Notebook", 846.89, computacion),
+						new Producto("Hewlett Packard Multifuncional", 200.89, computacion),
+						new Producto("Bianchi Bicicleta", 70.89, deporte),
+						new Producto("HP Notebook Omen 17", 2500.89, computacion),
+						new Producto("Mica Cómoda 5 Cajones", 150.89, muebles),
+						new Producto("TV Sony Bravia OLED 4K Ultra HD", 2255.89, electronica)
+						)
+				.flatMap(producto -> {
+					producto.setCreateAt(new Date());
+					return service.save(producto);
+				})
+				
+		).subscribe(producto -> log.info("Insert: " + producto.getId() + " " + producto.getNombre()));
 		
 	}
 

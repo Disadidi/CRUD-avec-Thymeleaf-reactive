@@ -3,7 +3,7 @@ package com.hdconsulting.springboot.webflux.app.models.documents;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document
+@Document(collection="categorias")
 public class Categoria {
 	
 	@Id
