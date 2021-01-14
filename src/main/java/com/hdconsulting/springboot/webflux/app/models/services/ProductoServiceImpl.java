@@ -3,7 +3,9 @@ package com.hdconsulting.springboot.webflux.app.models.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.hdconsulting.springboot.webflux.app.models.dao.CategoriaDao;
 import com.hdconsulting.springboot.webflux.app.models.dao.ProductoDao;
+import com.hdconsulting.springboot.webflux.app.models.documents.Categoria;
 import com.hdconsulting.springboot.webflux.app.models.documents.Producto;
 
 import reactor.core.publisher.Flux;
@@ -14,6 +16,9 @@ public class ProductoServiceImpl implements ProductoService {
 	
 	@Autowired
 	private ProductoDao dao;
+	
+	@Autowired
+	private CategoriaDao categoriaDao;
 
 	@Override
 	public Flux<Producto> findAll() {
@@ -46,6 +51,21 @@ public class ProductoServiceImpl implements ProductoService {
 	@Override
 	public Flux<Producto> findAllConNombreUpperCaseRepeat(int delay) {
 		return findAllConNombreUpperCase().repeat(delay);
+	}
+
+	@Override
+	public Flux<Categoria> findAllCategoria() {
+		return categoriaDao.findAll();
+	}
+
+	@Override
+	public Mono<Categoria> findCategoriaById(String id) {
+		return categoriaDao.findById(id);
+	}
+
+	@Override
+	public Mono<Categoria> saveCategoria(Categoria categoria) {
+		return categoriaDao.save(categoria);
 	}
 
 }
