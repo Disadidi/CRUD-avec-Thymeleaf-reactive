@@ -2,12 +2,15 @@ package com.hdconsulting.springboot.webflux.app.controllers;
 
 import java.time.Duration;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.thymeleaf.spring5.context.webflux.ReactiveDataDriverContextVariable;
@@ -32,6 +36,9 @@ public class ProductoController {
 
 	@Autowired
 	private ProductoService service;
+	
+	@Value("${config.uploads.path}")
+	private String path;
 
 	private static final Logger log = LoggerFactory.getLogger(ProductoController.class);
 
@@ -101,7 +108,9 @@ public class ProductoController {
 
 	@PostMapping("/form")
 	public Mono<String> guardar(@Valid Producto producto, BindingResult result /* toujours après l'objet a valider */,
-			Model model, SessionStatus status /* pour supprimer les attributes de la session */) {
+			Model model,
+			@RequestPart FilePart file,
+			SessionStatus status /* pour supprimer les attributes de la session */) {
 		if (result.hasErrors()) {
 			model.addAttribute("boton", "Guardar");
 			model.addAttribute("titulo", "Errores en formulario Producto");
@@ -115,12 +124,26 @@ public class ProductoController {
 				if (producto.getCreateAt() == null) {
 					producto.setCreateAt(new Date());
 				}
+				
+				if (!file.filename().isEmpty()) {
+					producto.setFoto(UUID.randomUUID().toString() +  "-" + file.filename()
+					.replace(" ", "")
+					.replace(":", "")
+					.replace("\\", ""));
+				}
 				producto.setCategoria(c);
 				return service.save(producto);
 			}).doOnNext(p -> {
 				log.info("Categoria asignada: " + p.getCategoria().getNombre() + "Id Cat: " + p.getCategoria().getId());
 				log.info("Producto guardado: " + p.getNombre() + "Id: " + p.getId());
-			}).thenReturn("redirect:/listar?success=Producto+guardado+con+exito");
+			})
+			.flatMap(p -> {
+						if (!file.filename().isEmpty()) {
+							return file.transferTo(new File(path + p.getFoto()));
+						}
+						return Mono.empty();
+					})
+			.thenReturn("redirect:/listar?success=Producto+guardado+con+exito");
 
 		}
 	}
