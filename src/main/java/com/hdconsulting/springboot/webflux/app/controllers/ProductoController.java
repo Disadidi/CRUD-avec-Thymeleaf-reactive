@@ -71,7 +71,8 @@ public class ProductoController {
 				return Mono.error(new InterruptedException("No existe el producto"));
 			}
 			return Mono.just(p);
-		}).then(Mono.just("form")).onErrorResume(ex -> Mono.just("redirect:/listar?error=no+existe+el+producto"));
+		}).then(Mono.just("form"))
+				.onErrorResume(ex -> Mono.just("redirect:/listar?error=no+existe+el+producto"));
 
 	}
 
@@ -110,6 +111,19 @@ public class ProductoController {
 			}).thenReturn("redirect:/listar?success=Producto+guardado+con+exito");
 
 		}
+	}
+	
+	@GetMapping("/eliminar/{id}")
+	public Mono<String> eliminar(@PathVariable String id){
+		return service.findById(id)
+				.defaultIfEmpty(new Producto()).flatMap(p -> {
+					if (p.getId() == null) {
+						return Mono.error(new InterruptedException("No existe el product a eliminar!"));
+					}
+					return Mono.just(p);
+				})
+				.flatMap(service::delete).then(Mono.just("redirect:/listar?success=producto+eliminado+con+exito"))
+				.onErrorResume(ex -> Mono.just("redirect:/listar?error=no+existe+el+producto+a+eliminar"));
 	}
 
 	@GetMapping("/listar-datadriver")
