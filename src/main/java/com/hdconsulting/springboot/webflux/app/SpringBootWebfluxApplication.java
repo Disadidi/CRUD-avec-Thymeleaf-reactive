@@ -36,7 +36,7 @@ public class SpringBootWebfluxApplication implements CommandLineRunner {
 
 		mongoTemplate.dropCollection("productos").subscribe();
 		mongoTemplate.dropCollection("categorias").subscribe();
-		mongoTemplate.dropCollection("categoria").subscribe();
+		
 		
 		Categoria electronica = new Categoria("Electrònico");
 		Categoria  deporte = new Categoria("Deporte");

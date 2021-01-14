@@ -18,6 +18,7 @@
 			<th>nombre</th>
 			<th>precio</th>
 			<th>fecha</th>
+			<th>categoìa</th>
 			<th>editar</th>
 			<th>eliminar</th>
 		</tr>
@@ -28,6 +29,7 @@
 			<td th:text="${producto.nombre}"></td>
 			<td th:text="${producto.precio}"></td>
 			<td th:text="${producto.createAt}"></td>
+			<td th:text="${producto.categoria.nombre}"></td>
 			<td>
 				<a th:href="@{/form/} + ${producto.id}">editar</a>
 			</td>
