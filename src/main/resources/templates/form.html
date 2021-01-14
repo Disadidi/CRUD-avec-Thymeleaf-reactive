@@ -38,7 +38,7 @@
 		</div>
 
 		<div>
-			<label for="createAt">Categorai</label>
+			<label for="createAt">Categoria</label>
 			<div>
 				<select th:field="*{categoria.id}">
 					<option value="">-- seleccionar --</option>
@@ -48,7 +48,7 @@
 			</div>
 
 			<small th:if="${#fields.hasErrors('categoria.id')}"
-				th:errors="${categoria.id}"></small>
+				th:errors="*{categoria.id}"></small>
 
 		</div>
 		<div>

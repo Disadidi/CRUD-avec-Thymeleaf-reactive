@@ -3,6 +3,7 @@ package com.hdconsulting.springboot.webflux.app.models.documents;
 import java.util.Date;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
 import org.springframework.data.annotation.Id;
@@ -25,6 +26,7 @@ public class Producto {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date createAt;
 	
+	@Valid
 	private Categoria categoria;
 	
 	public Producto() {

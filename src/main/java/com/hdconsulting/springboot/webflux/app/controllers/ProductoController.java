@@ -109,10 +109,16 @@ public class ProductoController {
 
 		} else {
 			status.setComplete();
-			if (producto.getCreateAt() == null) {
-				producto.setCreateAt(new Date());
-			}
-			return service.save(producto).doOnNext(p -> {
+			
+			Mono<Categoria> categoria = service.findCategoriaById(producto.getCategoria().getId());
+			return categoria.flatMap(c -> {
+				if (producto.getCreateAt() == null) {
+					producto.setCreateAt(new Date());
+				}
+				producto.setCategoria(c);
+				return service.save(producto);
+			}).doOnNext(p -> {
+				log.info("Categoria asignada: " + p.getCategoria().getNombre() + "Id Cat: " + p.getCategoria().getId());
 				log.info("Producto guardado: " + p.getNombre() + "Id: " + p.getId());
 			}).thenReturn("redirect:/listar?success=Producto+guardado+con+exito");
 
