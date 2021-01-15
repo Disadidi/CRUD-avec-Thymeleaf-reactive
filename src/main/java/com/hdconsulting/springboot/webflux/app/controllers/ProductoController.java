@@ -1,5 +1,9 @@
 package com.hdconsulting.springboot.webflux.app.controllers;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Date;
 import java.util.UUID;
@@ -10,6 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +38,7 @@ import com.hdconsulting.springboot.webflux.app.models.services.ProductoService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+
 @SessionAttributes("producto") // on met l'attribute producto dans la session
 @Controller
 public class ProductoController {
@@ -45,6 +54,20 @@ public class ProductoController {
 	@ModelAttribute("categorias")
 	public Flux<Categoria> categorias(){
 		return service.findAllCategoria();
+	}
+	
+	@GetMapping("/uploads/img/{nombreFoto:.+}")
+	public Mono<ResponseEntity<Resource>> verFoto(@PathVariable String nombreFoto) throws MalformedURLException{
+		Path ruta = Paths.get(path).resolve(nombreFoto).toAbsolutePath();
+		
+		Resource imagen = new UrlResource(ruta.toUri());
+		
+		return Mono.just(
+				ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imagen.getFilename() + "\"")
+				.body(imagen)
+				);
+		
 	}
 	
 	@GetMapping("/ver/{id}")
@@ -155,7 +178,7 @@ public class ProductoController {
 			})
 			.flatMap(p -> {
 						if (!file.filename().isEmpty()) {
-							//return file.transferTo(new File(path + p.getFoto()));
+							return file.transferTo(new File(path + p.getFoto()));
 						}
 						return Mono.empty();
 					})
